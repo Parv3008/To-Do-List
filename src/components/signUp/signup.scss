@@ -1,0 +1,36 @@
+.signup-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    color: #242424;
+    border-radius: 10px;
+    box-shadow: 0 0px 10px rgba(255, 255, 255, 0.89);
+    padding: 20px;
+    width: 600px;
+    height: 600px;
+}
+
+.signup-form{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    .form-input{
+        width: 500px;
+        height: 40px;
+        padding: 3px 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+    .radio{
+        input{
+            margin-right: 5px;
+            margin-bottom: 30px;
+
+        }
+    }
+}
