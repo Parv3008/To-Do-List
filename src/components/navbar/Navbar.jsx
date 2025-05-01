@@ -1,7 +1,7 @@
 import React from 'react'
 import "./Navbar.scss"
 
-const Navbar = ({currentPage, setCurrentPage, currentUser, setCurrentUser}) => {
+const Navbar = ({setCurrentPage, currentUser, setCurrentUser}) => {
 
     const handleLogout = () => {
         setCurrentPage("signin")

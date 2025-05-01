@@ -39,7 +39,6 @@ const Signup = ({ setCurrentPage }) => {
     } else {
       users[formData.email] = {
         ...formData,
-        todos: [],
       };
     }
 
@@ -75,6 +74,7 @@ const Signup = ({ setCurrentPage }) => {
           name="mobile"
           type="tel"
           placeholder="Mobile No"
+        
           onChange={handleChange}
           className="form-input"
           required

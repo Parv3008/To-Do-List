@@ -7,6 +7,7 @@ const Signin = ({ setCurrentPage, setCurrentUser }) => {
 
   const handleSignin = (e) => {
     e.preventDefault();
+    
 
     const users = JSON.parse(localStorage.getItem("users")) || {};
 
@@ -24,6 +25,7 @@ const Signin = ({ setCurrentPage, setCurrentUser }) => {
     localStorage.setItem("currentUserEmail", email);
     alert("Signin successful!");
     setCurrentPage("dashboard");
+
   };
 
   return (
@@ -48,12 +50,6 @@ const Signin = ({ setCurrentPage, setCurrentUser }) => {
 
         <button type="submit">Sign In</button>
       </form>
-      <p className="signup-link">
-        Don't have an account?
-        <button onClick={() => setCurrentPage("signup")}>
-          Sign Up
-        </button>
-      </p>
     </div>
   );
 };
