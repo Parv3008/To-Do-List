@@ -1,61 +1,66 @@
-import React, { useEffect, useState } from "react";
+import React, { useId, useState } from "react";
 import "./Dashboard.scss";
 
 const Dashboard = ({ currentUser }) => {
+  const baseId = useId(); // stable prefix
   const [task, setTask] = useState("");
-  const [todos, setTodos] = useState([]);
+  const [taskCount, setTaskCount] = useState(0);
+  const [todos, setTodos] = useState(() => {
+    const stored = JSON.parse(localStorage.getItem("todos")) || [];
+    return stored.filter((todo) => todo.userId === currentUser.id);
+  });
   const [edit, setEdit] = useState(null);
 
-  const userKey = `todos_${currentUser.email}`;
-
-  useEffect(() => {
-    const storedTodos = JSON.parse(localStorage.getItem(userKey)) || [];
-    setTodos(storedTodos);
-  }, [userKey]);
-
-  const saveToLocalStorage = (updatedTodos) => {
-    localStorage.setItem(userKey, JSON.stringify(updatedTodos));
+  const updateAllTodos = (updatedTodos) => {
+    const all = JSON.parse(localStorage.getItem("todos")) || [];
+    const otherUsers = all.filter((todo) => todo.userId !== currentUser.id);
+    const newTodos = [...otherUsers, ...updatedTodos];
+    localStorage.setItem("todos", JSON.stringify(newTodos));
+    setTodos(updatedTodos);
   };
 
   const handleAddTask = () => {
     if (task.trim() === "") return;
 
-    let updatedTodos;
-    if (edit !== null) {
-      updatedTodos = [...todos];
-      updatedTodos[edit].text = task;
+    if (edit) {
+      const updated = todos.map((todo) =>
+        todo.id === edit ? { ...todo, text: task } : todo
+      );
+      updateAllTodos(updated);
       setEdit(null);
     } else {
-      updatedTodos = [...todos, { text: task, completed: false }];
+      const newTodo = {
+        id: `${baseId}-${taskCount}`, 
+        userId: currentUser.id,
+        text: task,
+        completed: false,
+      };
+      setTaskCount((prev) => prev + 1);
+      updateAllTodos([...todos, newTodo]);
     }
 
-    setTodos(updatedTodos);
-    saveToLocalStorage(updatedTodos);
     setTask("");
   };
 
-  const handleDelete = (index) => {
-    const updatedTodos = [...todos];
-    updatedTodos.splice(index, 1);
-    setTodos(updatedTodos);
-    saveToLocalStorage(updatedTodos);
+  const handleDelete = (id) => {
+    updateAllTodos(todos.filter((todo) => todo.id !== id));
   };
 
-  const handleEdit = (index) => {
-    setTask(todos[index].text);
-    setEdit(index);
+  const handleEdit = (id) => {
+    const toEdit = todos.find((todo) => todo.id === id);
+    setTask(toEdit.text);
+    setEdit(id);
   };
 
-  const handleCompleted = (index) => {
-    const updatedTodos = [...todos];
-    updatedTodos[index].completed = !updatedTodos[index].completed;
-    setTodos(updatedTodos);
-    saveToLocalStorage(updatedTodos);
+  const handleCompleted = (id) => {
+    const updated = todos.map((todo) =>
+      todo.id === id ? { ...todo, completed: !todo.completed } : todo
+    );
+    updateAllTodos(updated);
   };
 
   const handleClear = () => {
-    setTodos([]);
-    saveToLocalStorage([]);
+    updateAllTodos([]);
   };
 
   return (
@@ -71,69 +76,40 @@ const Dashboard = ({ currentUser }) => {
           className="task-input"
         />
         <button onClick={handleAddTask} className="task-btn">
-          {edit !== null ? "Update" : "Add"}
+          {edit ? "Update" : "Add"}
         </button>
       </div>
 
       <div className="task-lists">
         <h3>Pending Tasks</h3>
         {todos
-          .map((todo, index) => ({ ...todo, originalIndex: index }))
           .filter((todo) => !todo.completed)
           .map((todo) => (
-            <div key={todo.originalIndex} className="todo-item">
+            <div key={todo.id} className="todo-item">
               <span>{todo.text}</span>
               <div className="todo-actions">
-                <button
-                  onClick={() => handleCompleted(todo.originalIndex)}
-                  className="complete-btn"
-                >
-                  Complete
-                </button>
-                <button
-                  onClick={() => handleEdit(todo.originalIndex)}
-                  className="edit-btn"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(todo.originalIndex)}
-                  className="delete-btn"
-                >
-                  Delete
-                </button>
+                <button onClick={() => handleCompleted(todo.id)} className="complete-btn">Complete</button>
+                <button onClick={() => handleEdit(todo.id)} className="edit-btn">Edit</button>
+                <button onClick={() => handleDelete(todo.id)} className="delete-btn">Delete</button>
               </div>
             </div>
           ))}
 
         <h3>Completed Tasks</h3>
         {todos
-          .map((todo, index) => ({ ...todo, originalIndex: index })) // Keep track of original index
           .filter((todo) => todo.completed)
           .map((todo) => (
-            <div key={todo.originalIndex} className="todo-item completed">
+            <div key={todo.id} className="todo-item completed">
               <span>{todo.text}</span>
               <div className="todo-actions">
-              <button
-                  onClick={() => handleEdit(todo.originalIndex)}
-                  className="edit-btn"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(todo.originalIndex)}
-                  className="delete-btn"
-                >
-                  Delete
-                </button>
+                <button onClick={() => handleEdit(todo.id)} className="edit-btn">Edit</button>
+                <button onClick={() => handleDelete(todo.id)} className="delete-btn">Delete</button>
               </div>
             </div>
           ))}
-
-        <button onClick={handleClear} className="clear-btn">
-          Clear All Tasks
-        </button>
       </div>
+
+      <button onClick={handleClear} className="clear-btn">Clear All</button>
     </div>
   );
 };

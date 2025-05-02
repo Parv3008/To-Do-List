@@ -7,25 +7,24 @@ const Signin = ({ setCurrentPage, setCurrentUser }) => {
 
   const handleSignin = (e) => {
     e.preventDefault();
-    
 
-    const users = JSON.parse(localStorage.getItem("users")) || {};
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    const foundUser = users.find((user) => user.email === email);
 
-    if (!users[email]) {
+    if (!foundUser) {
       alert("User not found. Please sign up.");
       return;
     }
 
-    if (users[email].password !== password) {
+    if (foundUser.password !== password) {
       alert("Incorrect password.");
       return;
     }
 
-    setCurrentUser(users[email]);
-    localStorage.setItem("currentUserEmail", email);
+    setCurrentUser(foundUser);
+    localStorage.setItem("currentUser", JSON.stringify(foundUser)); // store entire object
     alert("Signin successful!");
     setCurrentPage("dashboard");
-
   };
 
   return (
